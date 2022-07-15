@@ -123,8 +123,12 @@ module Geminabox
         file_path = File.expand_path(File.join(Geminabox.data, *request.path_info))
         halt 404, 'Gem not found' unless File.exist?(file_path)
 
-        indexer.yank(file_path)
-        redirect url("/")
+        remaining_versions = indexer.yank(file_path)
+        if remaining_versions.empty?
+          redirect url("/")
+        else
+          redirect url(request.referrer)
+        end
       end
 
     end

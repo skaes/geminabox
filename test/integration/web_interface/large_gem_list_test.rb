@@ -19,41 +19,27 @@ class LargeGemListSpec < Geminabox::TestCase
 
     visit url_for("/")
 
-    assert_equal gems_on_page, %w[
-      my_gem-6.0
-      my_gem-5.0
-      my_gem-4.0
-      my_gem-3.0
-      my_gem-2.0
-      unrelated_gem-1.0
-    ]
+    assert_equal gems_on_page, my_gems(6).take(5) + %w[unrelated_gem-1.0]
 
     page.click_link 'Older versions...'
 
-    assert_equal gems_on_page, %w[
-      my_gem-6.0
-      my_gem-5.0
-      my_gem-4.0
-      my_gem-3.0
-      my_gem-2.0
-      my_gem-1.0
-    ]
+    6.downto(1).each do |i|
+      assert_current_path("/gems/my_gem")
+      assert_equal gems_on_page, my_gems(i)
+      page.find('.delete-form', match: :first).find_button('delete').click
+    end
 
-    page.find('.delete-form', match: :first).find_button('delete').click
-
-    assert_equal gems_on_page, %w[
-      my_gem-5.0
-      my_gem-4.0
-      my_gem-3.0
-      my_gem-2.0
-      my_gem-1.0
-      unrelated_gem-1.0
-    ]
+    assert_current_path("/")
+    assert_equal gems_on_page, %w[unrelated_gem-1.0]
   end
 
   def gems_on_page
     page.all('a.download').
          map{|el| el['href'] }.
          map{|url| url.split("/").last.gsub(/\.gem$/, '') }
+  end
+
+  def my_gems(num)
+    (1..num).map { |i| "my_gem-#{i}.0" }.reverse
   end
 end

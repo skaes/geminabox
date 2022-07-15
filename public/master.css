@@ -18,6 +18,11 @@ a {
   color: #00a;
 }
 
+a.versions {
+  text-decoration: none;
+  color: #000;
+}
+
 a:hover {
   color: #00f;
 }

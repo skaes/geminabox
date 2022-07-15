@@ -61,8 +61,10 @@ module Geminabox
       FileUtils.rm_f(spec_file)
       Server.dependency_cache.flush_key(spec.name)
 
-      update_legacy_indexes_after_yanking(spec)
+      remaining_versions = update_legacy_indexes_after_yanking(spec)
       compact_indexer.yank(spec) if compact_indexer.active?
+
+      remaining_versions
     ensure
       remove_indexer_directory
     end
@@ -156,6 +158,8 @@ module Geminabox
       end
 
       update_indexes(all_versions, latest_versions, prerelease_versions)
+
+      all_versions_by_name[spec.name]
     end
   end
 end
