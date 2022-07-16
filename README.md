@@ -46,12 +46,15 @@ Mode of operation of a Geminabox server is controlled through the following bool
 class `Geminabox`:
 
 | Parameter              | Purpose                                                                                        |
-|------------------------|------------------------------------------------------------------------------------------------|
-| allow\_upload          | allow uploads of gems to the server                                                            |
-| allow\_replace         | allow local gems to be replaced with new versions (this is insecure, use at your own risk)     |
-| allow\_delete          | allow deletions of local gems                                                                  |
-| rubygems\_proxy        | whether gems from an upstream rubygems server should be fetched and cached locally             |
-| allow\_remote\_failure | whether the server should serve locally cached gems in case the upstream server is unavailable |
+|------------------------|----------------------------------------------------------|
+| allow\_upload          | allow uploads of gems to the server                      |
+| allow\_replace         | allow local gems to be replaced with new versions        |
+|                        |   (this is insecure, use at your own risk)               |
+| allow\_delete          | allow deletions of local gems                            |
+| rubygems\_proxy        | whether gems from an upstream rubygems server            |
+|                        | should be fetched and cached locally                     |
+| allow\_remote\_failure | whether the server should serve locally cached gems      |
+|                        | in case the upstream server is unavailable               |
 
 
 There are three possible configurations for a Geminabox: a standalone server, where
