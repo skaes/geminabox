@@ -2,9 +2,9 @@ name: Ruby
 
 on:
   push:
-    branches: [ master ]
+    branches: [ main ]
   pull_request:
-    branches: [ master ]
+    branches: [ main ]
 
 jobs:
   test:
@@ -12,31 +12,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        ruby-version: [2.3.8, 2.4.10, 2.5.9, 2.6.10, 2.7.6, 3.0.4, 3.1.2]
+        ruby-version: [2.7.6, 3.0.4, 3.1.2]
         gem-version: [3.3.15]
-        include:
-          - ruby-version: 2.3.8
-            gem-version: 2.7.11
-          - ruby-version: 2.4.10
-            gem-version: 2.7.11
-          - ruby-version: 2.5.9
-            gem-version: 2.7.11
-          # Test with RubyGems 2.5.0 as it is specified in gemspec
-          - ruby-version: 2.3.8
-            gem-version: 2.5.0
-            continue-on-error: true
-          - ruby-version: 2.4.10
-            gem-version: 2.5.0
-            continue-on-error: true
-          - ruby-version: 2.5.9
-            gem-version: 2.5.0
-            continue-on-error: true
-          - ruby-version: 2.6.10
-            gem-version: 2.5.0
-            continue-on-error: true
-          - ruby-version: 2.7.6
-            gem-version: 2.5.0
-            continue-on-error: true
 
     steps:
     - uses: actions/checkout@v3
@@ -68,7 +45,7 @@ jobs:
       with:
         coverageLocations: ${{ github.workspace }}/coverage/.resultset_workaround.json:simplecov
       env:
-        CC_TEST_REPORTER_ID: 9b585696c2187df640c9fe468b29a1e8cd5ea766a867b2c6f22b7e25d648155b
+        CC_TEST_REPORTER_ID: 7fb735382fb47329991488219f04e879295d227e6674b8a34edfe6c76cd0c8b7
 
   rubocop:
     runs-on: ubuntu-20.04
