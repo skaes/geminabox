@@ -16,7 +16,7 @@ module Geminabox
 
       def create
         if data = new_content
-          f = Tempfile.create('geminabox')
+          f = Tempfile.create('geminabox', perm: Geminabox.gem_permissions)
           f.binmode
           begin
             f.write(data)

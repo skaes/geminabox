@@ -19,12 +19,14 @@ module Geminabox
 
       def copy_local
         FileUtils.cp local_path, proxy_path
+        File.chmod(Geminabox.gem_permissions, proxy_path)
       end
 
       def get_remote
         begin
           if rc = remote_content
             File.open(proxy_path, 'wb'){|f| f.write(rc) }
+            File.chmod(Geminabox.gem_permissions, proxy_path)
           end
         rescue
           File.unlink(proxy_path) if File.exist?(proxy_path)
