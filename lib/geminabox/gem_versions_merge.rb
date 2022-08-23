@@ -4,6 +4,7 @@ module Geminabox
   module GemVersionsMerge
     def self.merge(local_gem_list, remote_gem_list)
       return local_gem_list unless remote_gem_list
+      return remote_gem_list unless local_gem_list
 
       local_split = local_gem_list.split("\n")
       remote_split = remote_gem_list.split("\n")

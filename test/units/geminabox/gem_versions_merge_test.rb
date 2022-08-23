@@ -41,5 +41,12 @@ module Geminabox
       assert_equal expected, merged
     end
 
+    def test_returns_remote_versions_if_local_versions_are_nil
+      local = nil
+      remote = "created_at: 2021-06-27T16:14:36.466+0000\n---\ntest-gem 0.0.5 e7218e76477e2137355d2e7ded094925\n"
+      expected = remote
+      assert_equal expected, GemVersionsMerge.merge(local, remote)
+    end
+
   end
 end
