@@ -101,8 +101,13 @@ module Geminabox
       end
 
       gem_count = proxied_versions.values.map(&:size).inject(0, :+)
-      say "Moving #{gem_count} proxied gem versions to proxy cache"
+      if gem_count.zero?
+        say "No gems to move to the proxy cache"
+        say "Run geminabox reindex if you want to rebuild all indexes"
+        return
+      end
 
+      say "Moving #{gem_count} proxied gem versions to proxy cache"
       proxied_versions.each_value do |versions|
         versions.each do |version|
           move_gem_to_proxy_cache("#{version.gemfile_name}.gem")
@@ -116,6 +121,12 @@ module Geminabox
     def move_gems_from_proxy_cache_to_local_index
       gems_to_move = Dir["#{cache.gems_dir}/*.gem"]
       gem_count = gems_to_move.size
+
+      if gem_count.zero?
+        say "No gems to move to the local index"
+        say "Run geminabox reindex if you want to rebuild all indexes"
+        return
+      end
 
       say "Moving #{gem_count} proxied gem versions to local index"
       FileUtils.mv(gems_to_move, File.join(Geminabox.data, "gems"))
