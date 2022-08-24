@@ -33,8 +33,9 @@ description = <<~DESC
   standalone:
     Converts your proxy setup into a standalone server.
 
-    This moves all gems from the proxy cache to the the local gem directory and
-    rebuilds the local index.
+    This moves all gems from the proxy cache that are proxied (as
+    defined above) to the local gem directory and rebuilds the local
+    index.
 
 DESC
 

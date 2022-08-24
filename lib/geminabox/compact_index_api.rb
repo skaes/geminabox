@@ -119,6 +119,8 @@ module Geminabox
     end
 
     def move_gems_from_proxy_cache_to_local_index
+      clean_remote_cache
+
       gems_to_move = Dir["#{cache.gems_dir}/*.gem"]
       gem_count = gems_to_move.size
 
@@ -136,6 +138,33 @@ module Geminabox
     end
 
     private
+
+    def clean_remote_cache
+      # Remove all gems from remote cache that also have local versions.
+      # Moving those gems to a standalone server would be a security risk.
+      gems = Dir["#{cache.gems_dir}/*.gem"]
+      count = gems.size + 1
+      n = Geminabox.workers
+
+      title = "Cleaning remote gems cache of size #{count}"
+      progressbar_options = Gem::DefaultUserInteraction.ui.outs.tty? && n > 1 && {
+        title: title,
+        total: count,
+        format: '%t %b',
+        progress_mark: '.'
+      }
+      say title unless progressbar_options
+
+      local_gem_names = Set.new(all_gems.list)
+      gems_to_remove = Parallel.map(gems, progress: progressbar_options, in_processes: n) do |path|
+        local_gem_names.include?(Gem::Package.new(path.to_s).spec.name) ? path : nil
+      end.compact
+
+      gems_to_remove.each do |path|
+        say "\nRemoving conflicting gems from remote cache: #{File.basename(path)}"
+        FileUtils.rm(path)
+      end
+    end
 
     def move_gem_to_proxy_cache(gemfile)
       gemfile_path = File.join(Geminabox.data, "gems", gemfile)
