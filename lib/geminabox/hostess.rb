@@ -68,6 +68,7 @@ module Geminabox
       return serve_local_file if File.exist?(file)
 
       cache_path = retrieve_gem_from_cache_or_rubygems(gem_path)
+      ensure_not_a_local_gem(cache_path)
 
       headers["Cache-Control"] = 'no-transform'
       send_file(cache_path, :type => response['Content-Type'])
@@ -79,6 +80,11 @@ module Geminabox
         path = URI.join(ruby_gems_url, gem_path)
         Geminabox.http_adapter.get_content(path)
       end
+    end
+
+    def ensure_not_a_local_gem(cache_path)
+      spec = Gem::Package.new(cache_path.to_s).spec
+      halt 404 if CompactIndexApi.new.local_gem_info(spec.name)
     end
 
   end

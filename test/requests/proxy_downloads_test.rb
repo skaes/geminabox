@@ -18,9 +18,10 @@ class ProxyDownloadsTest < Minitest::Test
   end
 
   test "can download remote gems" do
+    v1_gem = GemFactory.gem_file("foo", version: "1.0.0")
     stub_request(:get, "https://rubygems.org/gems/foo-1.0.0.gem")
       .with(headers: { 'User-Agent' => /./ })
-      .to_return(status: 200, body: "foo-1.0.0.gem", headers: {})
+      .to_return(status: 200, body: File.binread(v1_gem), headers: {"Content-Type" => "application/octet-stream"})
 
     get "/gems/foo-1.0.0.gem"
     assert last_response.ok?, "unexpected response for /gems/foo-1.0.0.gem --> #{last_response.inspect}"
@@ -30,6 +31,19 @@ class ProxyDownloadsTest < Minitest::Test
     inject_gems { |builder| builder.gem "example" }
     get "/gems/example-1.0.0.gem"
     assert last_response.ok?, "unexpected response for /gems/example-1.0.0.gem --> #{last_response.inspect}"
+  end
+
+  test "refuses to serve a remote gem that has local versions" do
+    inject_gems { |builder| builder.gem "foo", version: "1.0.0" }
+    Geminabox::CompactIndexer.new.reindex
+
+    v2_gem = GemFactory.gem_file("foo", version: "2.0.0")
+    stub_request(:get, "https://rubygems.org/gems/foo-2.0.0.gem")
+      .with(headers: { 'User-Agent' => /./ })
+      .to_return(status: 200, body: File.binread(v2_gem), headers: {"Content-Type" => "application/octet-stream"})
+
+    get "/gems/foo-2.0.0.gem"
+    assert last_response.not_found?, "unexpected response for /gems/foo-2.0.0.gem --> #{last_response.inspect}"
   end
 
   test "can download remote gem specs from the quick index" do
