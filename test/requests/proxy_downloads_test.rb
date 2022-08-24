@@ -27,6 +27,24 @@ class ProxyDownloadsTest < Minitest::Test
     assert last_response.ok?, "unexpected response for /gems/foo-1.0.0.gem --> #{last_response.inspect}"
   end
 
+  test "returns no found for gems not on remote server - 403" do
+    stub_request(:get, "https://rubygems.org/gems/foo-1.0.0.gem")
+      .with(headers: { 'User-Agent' => /./ })
+      .to_return(status: 403, body: "something", headers: {})
+
+    get "/gems/foo-1.0.0.gem"
+    assert last_response.not_found?, "unexpected response for /gems/foo-1.0.0.gem --> #{last_response.inspect}"
+  end
+
+  test "returns no found for gems not on remote server - 404" do
+    stub_request(:get, "https://rubygems.org/gems/foo-1.0.0.gem")
+      .with(headers: { 'User-Agent' => /./ })
+      .to_return(status: 404, body: "something", headers: {})
+
+    get "/gems/foo-1.0.0.gem"
+    assert last_response.not_found?, "unexpected response for /gems/foo-1.0.0.gem --> #{last_response.inspect}"
+  end
+
   test "can download local gems" do
     inject_gems { |builder| builder.gem "example" }
     get "/gems/example-1.0.0.gem"

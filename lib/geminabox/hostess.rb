@@ -72,6 +72,8 @@ module Geminabox
 
       headers["Cache-Control"] = 'no-transform'
       send_file(cache_path, :type => response['Content-Type'])
+    rescue HTTPClient::BadResponseError
+      halt 404
     end
 
     def retrieve_gem_from_cache_or_rubygems(gem_path)
