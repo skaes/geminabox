@@ -1,4 +1,5 @@
 require 'time'
+require 'set'
 
 module Geminabox
   module GemVersionsMerge
@@ -9,11 +10,11 @@ module Geminabox
       local_split = local_gem_list.split("\n")
       remote_split = remote_gem_list.split("\n")
 
-      combined = gems_hash(remote_split).merge(gems_hash(local_split))
+      preamble = younger_created_at_header(local_split.shift(2), remote_split.shift(2))
 
-      preamble = younger_created_at_header(local_split, remote_split)
+      remove_local_gems(local_split, remote_split)
 
-      "#{(preamble + combined.values.sort).join("\n")}\n"
+      "#{(preamble + remote_split + local_split).join("\n")}\n"
     end
 
     def self.younger_created_at_header(local_split, remote_split)
@@ -22,17 +23,16 @@ module Geminabox
       (t1 > t2 ? local_split : remote_split)[0..1]
     end
 
-    def self.gems_hash(source)
-      source[2..-1].each_with_object({}) do |line, hash|
-        line.chomp!
-        name, versions, digest = line.split
-        seen = hash[name]
-        if seen
-          seen_versions = seen.split[1]
-          hash[name] = "#{name} #{seen_versions},#{versions} #{digest}"
-        else
-          hash[name] = line
-        end
+    def self.gem_names(split)
+      split.each_with_object(Set.new) do |line, gems|
+        line =~ /\A([^\s]+)\s.*\z/ && gems << $1
+      end
+    end
+
+    def self.remove_local_gems(local_split, remote_split)
+      local_names = gem_names(local_split)
+      remote_split.reject! do |line|
+        line =~ /\A([^\s]+)\s.*\z/ && local_names.include?($1)
       end
     end
   end

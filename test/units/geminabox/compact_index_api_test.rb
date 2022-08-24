@@ -89,7 +89,7 @@ module Geminabox
       Geminabox.rubygems_proxy = true
       @remote_api.expect(:fetch_versions, [200, remote_versions], [nil])
       combined_versions = @api.versions
-      assert_match(/a 1.0.0 \S{32}\nb 1.0.0 \S{32}\nr 1.0.0 \S{32}\nz 1.0.0 \S{32}\n/, combined_versions)
+      assert_match(/a 1.0.0 \S{32}\nr 1.0.0 \S{32}\nb 1.0.0 \S{32}\nz 1.0.0 \S{32}\n/, combined_versions)
       @remote_api.verify
     end
 
@@ -100,7 +100,7 @@ module Geminabox
       etag = @api.cache.md5("versions")
       @remote_api.expect(:fetch_versions, [304, remote_versions], [etag])
       combined_versions = @api.versions
-      assert_match(/a 1.0.0 \S{32}\nb 1.0.0 \S{32}\nr 1.0.0 \S{32}\nz 1.0.0 \S{32}\n/, combined_versions)
+      assert_match(/a 1.0.0 \S{32}\nr 1.0.0 \S{32}\nb 1.0.0 \S{32}\nz 1.0.0 \S{32}\n/, combined_versions)
       @remote_api.verify
     end
 
