@@ -16,7 +16,7 @@ module Geminabox
 
       def create
         if data = new_content
-          f = Tempfile.create('geminabox', perm: Geminabox.gem_permissions)
+          f = Tempfile.create('geminabox')
           f.binmode
           begin
             f.write(data)
@@ -24,6 +24,7 @@ module Geminabox
             f.close rescue nil
           end
           FileUtils.mv f.path, splice_path
+          File.chmod Geminabox.gem_permissions, splice_path
         end
       end
 
