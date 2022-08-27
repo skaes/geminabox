@@ -22,7 +22,6 @@ module Geminabox
 
     def reindex
       Indexer.new.reindex(:force_rebuild)
-      CompactIndexer.new.reindex
       assert @api.local_versions
     end
 
