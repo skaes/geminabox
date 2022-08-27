@@ -31,10 +31,42 @@ module Geminabox
       end
     end
 
+    def combined_versions_file
+      Geminabox.data+"versions.combined"
+    end
+
+    def combined_versions_file_fresh?
+      File.exist?(combined_versions_file) && (Time.now - File.mtime(combined_versions_file) < 60)
+    end
+
+    def remove_combined_versions_file
+      FileUtils.rm_f(combined_versions_file)
+    end
+
+    def update_combined_versions_file
+      Gem.time "Updated combined versions file" do
+        combined_versions = GemVersionsMerge.merge(local_versions, remote_versions)
+
+        f = Tempfile.new("geminabox-combined-versions", binmode: true)
+        f.write(combined_versions)
+        f.close
+        FileUtils.chmod(Geminabox.gem_permissions, f.path)
+        FileUtils.mv(f.path, combined_versions_file)
+
+        combined_versions
+      end
+    end
+
     def versions
       return local_versions unless Geminabox.rubygems_proxy
+      return File.binread(combined_versions_file) if combined_versions_file_fresh?
 
-      GemVersionsMerge.merge(local_versions, remote_versions)
+      begin
+         Server.with_rlock { update_combined_versions_file }
+      rescue ReentrantFlock::AlreadyLocked
+        # Use the potentially outdated combined versions file if we can't get the lock.
+        File.binread(combined_versions_file)
+      end
     end
 
     def info(name)

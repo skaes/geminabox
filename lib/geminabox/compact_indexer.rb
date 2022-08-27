@@ -74,6 +74,8 @@ module Geminabox
       Gem.time("Compact index full rebuild") do
         full_reindex
       end
+    ensure
+      update_combined_versions_file
     end
 
     def yank(spec)
@@ -88,9 +90,19 @@ module Geminabox
 
         prepare_files_for_yank(name, info, dest_paths)
       end
+    ensure
+      update_combined_versions_file
     end
 
     private
+
+    def compact_index_api
+      @compact_index_api ||= CompactIndexApi.new
+    end
+
+    def update_combined_versions_file
+      compact_index_api.update_combined_versions_file if Geminabox.rubygems_proxy
+    end
 
     def incremental_reindex(gem_specs)
       with_tmp_dir do |dest_paths|

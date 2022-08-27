@@ -10,6 +10,7 @@ class DependencyApiWithProxyEnabledTest < Minitest::Test
     inject_gems do |builder|
       builder.gem(:foo)
     end
+    stub_versions_file_request
     Geminabox::Indexer.new.reindex(:force_rebuild)
   end
 

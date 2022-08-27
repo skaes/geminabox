@@ -6,6 +6,8 @@ module Geminabox
     def setup
       clean_data_dir
       @indexer = CompactIndexer.new
+      @compact_index_api = Minitest::Mock.new
+      @indexer.instance_variable_set :@compact_index_api, @compact_index_api
     end
 
     def test_info_path_does_not_exist
@@ -30,6 +32,15 @@ module Geminabox
 
       assert version_info.versions.empty?
       assert version_info.digests.empty?
+    end
+
+    def test_reindexing_a_proxy_updates_the_combined_versions_file
+      Geminabox.rubygems_proxy = true
+      @compact_index_api.expect :update_combined_versions_file, nil
+      @indexer.reindex
+      @compact_index_api.verify
+    ensure
+      Geminabox.rubygems_proxy = false
     end
 
     def test_full_reindex_with_gems_creates_index_files
@@ -80,6 +91,32 @@ module Geminabox
 
       assert version_info.versions.empty?
       assert version_info.digests.empty?
+    end
+
+    def test_removing_a_gem_from_a_proxy_updates_the_combined_version_file
+      Geminabox.rubygems_proxy = true
+
+      FileUtils.mkdir_p(@indexer.info_path)
+      VersionInfo.new.write(@indexer.versions_path)
+
+      spec = add_gem("foobar").first
+
+      @compact_index_api.expect :update_combined_versions_file, nil
+      @indexer.reindex([spec])
+
+      @compact_index_api.expect :update_combined_versions_file, nil
+      @indexer.yank(spec)
+
+      @compact_index_api.verify
+
+      version_info = load_versions
+      info_name_path = @indexer.info_name_path("foobar")
+      refute File.exist?(info_name_path)
+
+      assert version_info.versions.empty?
+      assert version_info.digests.empty?
+    ensure
+      Geminabox.rubygems_proxy = false
     end
 
     def add_gem(name, options = {})

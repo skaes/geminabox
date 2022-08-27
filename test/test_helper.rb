@@ -100,4 +100,10 @@ class Minitest::Test
     Gem::Indexer.new(Geminabox.data).generate_index
   end
 
+  def stub_versions_file_request
+    body = Geminabox::VersionInfo.new.content
+    stub_request(:get, "https://bundler.rubygems.org/versions")
+      .to_return(status: 200, body: body, headers: {})
+  end
+
 end

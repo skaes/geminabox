@@ -61,9 +61,10 @@ module Geminabox
 
     def test_uploading_two_versions_of_a_new_local_gem
       Geminabox.rubygems_proxy = true
+      stub_versions_file_request
       stub_request(:get, "https://bundler.rubygems.org/info/example")
-        .with(headers: { 'User-Agent' => /./ })
         .to_return(status: 404, body: "", headers: {})
+
       gem1 = incoming_gem(:example, version: "1.0.0")
       GemStore.create(gem1)
       assert File.exist?(File.join(Geminabox.data, "gems", "example-1.0.0.gem"))
@@ -76,9 +77,10 @@ module Geminabox
 
     def test_uploading_a_version_of_gem_unknown_to_rubygems
       Geminabox.rubygems_proxy = true
+      stub_versions_file_request
       stub_request(:get, "https://bundler.rubygems.org/info/example")
-        .with(headers: { 'User-Agent' => /./ })
         .to_return(status: 200, body: "---\n1.0.0 |checksum:unknown", headers: {})
+
       gem = incoming_gem(:example, version: "3.0.0")
       GemStore.create(gem)
       assert File.exist?(File.join(Geminabox.data, "gems", "example-3.0.0.gem"))
@@ -88,12 +90,15 @@ module Geminabox
 
     def test_uploading_a_version_of_a_gem_already_known_to_rubygems
       Geminabox.rubygems_proxy = true
+
       gem_file_path = gem_file(:example, version: "4.0.0")
       checksum = Digest::SHA256.file(gem_file_path).hexdigest
       gem = IncomingGem.new(File.open(gem_file_path, "rb"))
+
+      stub_versions_file_request
       stub_request(:get, "https://bundler.rubygems.org/info/example")
-        .with(headers: { 'User-Agent' => /./ })
         .to_return(status: 200, body: "---\n4.0.0 |checksum:#{checksum}", headers: {})
+
       assert_gem_store_error(412, 'Ignoring upload') do
         GemStore.create(gem)
       end

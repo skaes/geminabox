@@ -12,7 +12,6 @@ module Geminabox
       @api = CompactIndexApi.new
       @remote_api = Minitest::Mock.new
       @api.instance_variable_set :@api, @remote_api
-      @api.cache.flush_all
       reindex
     end
 
@@ -21,7 +20,10 @@ module Geminabox
     end
 
     def reindex
+      stub_versions_file_request if Geminabox.rubygems_proxy
       Indexer.new.reindex(:force_rebuild)
+      @api.remove_combined_versions_file
+      @api.cache.flush_all
       assert @api.local_versions
     end
 
