@@ -24,6 +24,10 @@ module Geminabox
       ensure_dirs_exist!
     end
 
+    def path(file_path)
+      cache_path + file_path
+    end
+
     def cache(file_path)
       path = cache_path + file_path
       write(path, yield) unless path.exist?
