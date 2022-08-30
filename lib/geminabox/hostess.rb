@@ -5,9 +5,11 @@ require 'sinatra/base'
 module Geminabox
   module Hostess
 
+    SPECS_PATHS = %w[/specs.4.8.gz /latest_specs.4.8.gz /prerelease_specs.4.8.gz]
+
     def self.included(app)
       app.class_eval do
-        %w[/specs.4.8.gz /latest_specs.4.8.gz /prerelease_specs.4.8.gz].each do |index|
+        SPECS_PATHS.each do |index|
           get index do
             serve_compressed_index(index)
           end
