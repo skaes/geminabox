@@ -8,6 +8,13 @@ module Geminabox
   module Proxy
     class Splicer < FileHandler
 
+      attr_reader :cache
+
+      def initialize(file_name)
+        super
+        @cache = RemoteCache.new
+      end
+
       def self.make(file_name)
         splicer = new(file_name)
         splicer.create
@@ -15,25 +22,22 @@ module Geminabox
       end
 
       def create
-        if data = new_content
-          f = Tempfile.create('geminabox')
-          f.binmode
-          begin
-            f.write(data)
-          ensure
-            f.close rescue nil
-          end
-          FileUtils.mv f.path, splice_path
-          File.chmod Geminabox.gem_permissions, splice_path
+        if content = new_content
+          store_content(content)
         end
       end
 
       def new_content
-        if local_file_exists?
-          merge_content
-        else
-          remote_content
-        end
+        remote_content = self.remote_content
+        return remote_content unless local_file_exists?
+
+        new_remote_data = cache.md5(file_name) != Digest::MD5.hexdigest(remote_content)
+        cache.store(file_name, remote_content) if new_remote_data
+
+        dependencies_last_modified = [local_path, cache.path(file_name)].map{|p| File.mtime(p)}.max
+        return nil if splice_file_exists? && File.mtime(splice_path) > dependencies_last_modified
+
+        merge_content(local_content, remote_content)
       end
 
       def splice_path
@@ -44,11 +48,11 @@ module Geminabox
         file_exists? splice_path
       end
 
-      def merge_content
+      def merge_content(local_data, remote_data)
         if gzip?
-          merge_gziped_content
+          merge_gzipped_content(local_data, remote_data)
         else
-          merge_text_content
+          merge_text_content(local_data, remote_data)
         end
       end
 
@@ -57,12 +61,9 @@ module Geminabox
       end
 
       private
-      def merge_gziped_content
-        if rc = remote_content
-          package(unpackage(local_content) | unpackage(rc))
-        else
-          local_content
-        end
+
+      def merge_gzipped_content(local_data, remote_data)
+        package(unpackage(local_data) | unpackage(remote_data))
       end
 
       def unpackage(content)
@@ -73,8 +74,20 @@ module Geminabox
         Gem::Util.gzip(Marshal.dump(content))
       end
 
-      def merge_text_content
-        local_content.to_s + remote_content.to_s
+      def merge_text_content(local_data, remote_data)
+        local_data.to_s + remote_data.to_s
+      end
+
+      def store_content(content)
+        f = Tempfile.create('geminabox')
+        f.binmode
+        begin
+          f.write(content)
+        ensure
+          f.close rescue nil
+        end
+        FileUtils.mv(f.path, splice_path)
+        File.chmod(Geminabox.gem_permissions, splice_path)
       end
 
     end
