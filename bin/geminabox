@@ -79,6 +79,7 @@ begin
   when "standalone"
     Geminabox::CompactIndexApi.new.move_gems_from_proxy_cache_to_local_index
   when "update-cached-remote-specs"
+    Geminabox::CompactIndexApi.new.update_combined_versions_file
     Geminabox::Hostess.update_spliced_indexes
   else
     warn "unknown comand: #{ARGV[0]}"

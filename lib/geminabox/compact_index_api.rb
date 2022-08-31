@@ -36,7 +36,7 @@ module Geminabox
     end
 
     def combined_versions_file_fresh?
-      File.exist?(combined_versions_file) && (Time.now - File.mtime(combined_versions_file) < 60)
+      File.exist?(combined_versions_file) && (Geminabox.external_index_update || (Time.now - File.mtime(combined_versions_file) < 60))
     end
 
     def remove_combined_versions_file
