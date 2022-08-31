@@ -67,7 +67,8 @@ module Geminabox
       :bundler_ruby_gems_url,
       :allow_upload,
       :on_gem_received,
-      :workers
+      :workers,
+      :external_index_update
     )
 
     def set_defaults(defaults)
@@ -102,7 +103,8 @@ module Geminabox
     bundler_ruby_gems_url:          'https://bundler.rubygems.org/',
     allow_upload:                   true,
     on_gem_received:                nil,
-    workers:                        10
+    workers:                        10,
+    external_index_update:          false
   )
 
 end

@@ -30,7 +30,9 @@ module Geminabox
     def serve_compressed_index(index)
       content_type 'application/x-gzip'
       if Geminabox.rubygems_proxy
-        serve_proxied(Proxy::Splicer.make(index[1..-1]))
+        splicer = Proxy::Splicer.new(index[1..-1])
+        splicer.create unless Geminabox.external_index_update && splicer.splice_file_exists?
+        serve_proxied(splicer)
       else
         serve_local_file
       end
