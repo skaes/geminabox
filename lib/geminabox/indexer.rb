@@ -47,6 +47,7 @@ module Geminabox
       else
         incremental_reindex
       end
+      update_spliced_indexes
     ensure
       remove_indexer_directory
     end
@@ -63,6 +64,8 @@ module Geminabox
 
       remaining_versions = update_legacy_indexes_after_yanking(spec)
       compact_indexer.yank(spec) if compact_indexer.active?
+
+      update_spliced_indexes
 
       remaining_versions
     ensure
@@ -141,6 +144,12 @@ module Geminabox
 
     def remove_indexer_directory
       FileUtils.rm_rf(indexer.directory)
+    end
+
+    def update_spliced_indexes
+      return unless Geminabox.rubygems_proxy
+
+      Hostess.update_spliced_indexes
     end
 
     def update_legacy_indexes_after_yanking(spec)
