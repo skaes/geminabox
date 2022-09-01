@@ -62,6 +62,7 @@ module Geminabox
     def test_uploading_two_versions_of_a_new_local_gem
       Geminabox.rubygems_proxy = true
       stub_versions_file_request
+      stub_index_files_requests
       stub_request(:get, "https://bundler.rubygems.org/info/example")
         .to_return(status: 404, body: "", headers: {})
 
@@ -78,6 +79,7 @@ module Geminabox
     def test_uploading_a_version_of_gem_unknown_to_rubygems
       Geminabox.rubygems_proxy = true
       stub_versions_file_request
+      stub_index_files_requests
       stub_request(:get, "https://bundler.rubygems.org/info/example")
         .to_return(status: 200, body: "---\n1.0.0 |checksum:unknown", headers: {})
 
@@ -96,6 +98,7 @@ module Geminabox
       gem = IncomingGem.new(File.open(gem_file_path, "rb"))
 
       stub_versions_file_request
+      stub_index_files_requests
       stub_request(:get, "https://bundler.rubygems.org/info/example")
         .to_return(status: 200, body: "---\n4.0.0 |checksum:#{checksum}", headers: {})
 

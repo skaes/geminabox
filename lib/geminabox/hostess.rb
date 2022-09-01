@@ -9,7 +9,7 @@ module Geminabox
 
     def self.update_spliced_indexes
       Gem.time "Updated spliced index files" do
-        SPECS_PATHS.each { |index| Proxy::Splicer.new(index[1..-1]) }
+        SPECS_PATHS.each { |index| Proxy::Splicer.make(index[1..-1]) }
       end
     end
 

@@ -106,4 +106,14 @@ class Minitest::Test
       .to_return(status: 200, body: body, headers: {})
   end
 
+  def stub_index_files_requests
+    empty_remote_index = Gem::Util.gzip(Marshal.dump([]))
+    stub_request(:get, "https://rubygems.org/specs.4.8.gz").
+      to_return(status: 200, body: empty_remote_index, headers: {})
+    stub_request(:get, "https://rubygems.org/latest_specs.4.8.gz").
+      to_return(status: 200, body: empty_remote_index, headers: {})
+    stub_request(:get, "https://rubygems.org/prerelease_specs.4.8.gz").
+      to_return(status: 200, body: empty_remote_index, headers: {})
+  end
+
 end

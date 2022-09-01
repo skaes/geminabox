@@ -20,7 +20,10 @@ module Geminabox
     end
 
     def reindex
-      stub_versions_file_request if Geminabox.rubygems_proxy
+      if Geminabox.rubygems_proxy
+        stub_versions_file_request
+        stub_index_files_requests
+      end
       Indexer.new.reindex(:force_rebuild)
       @api.remove_combined_versions_file
       @api.cache.flush_all

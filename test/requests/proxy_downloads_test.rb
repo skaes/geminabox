@@ -54,6 +54,7 @@ class ProxyDownloadsTest < Minitest::Test
   test "refuses to serve a remote gem that has local versions" do
     inject_gems { |builder| builder.gem "foo", version: "1.0.0" }
     stub_versions_file_request
+    stub_index_files_requests
     Geminabox::CompactIndexer.new.reindex
 
     v2_gem = GemFactory.gem_file("foo", version: "2.0.0")
