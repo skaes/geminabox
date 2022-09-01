@@ -8,7 +8,9 @@ module Geminabox
     SPECS_PATHS = %w[/specs.4.8.gz /latest_specs.4.8.gz /prerelease_specs.4.8.gz]
 
     def self.update_spliced_indexes
-      SPECS_PATHS.each { |index| Proxy::Splicer.new(index[1..-1]) }
+      Gem.time "Updated spliced index files" do
+        SPECS_PATHS.each { |index| Proxy::Splicer.new(index[1..-1]) }
+      end
     end
 
     def self.included(app)

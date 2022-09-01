@@ -45,13 +45,17 @@ module Geminabox
 
     def update_combined_versions_file
       Gem.time "Updated combined versions file" do
+        say "Fetching remote versions file"
         local_versions = self.local_versions
         remote_versions = self.remote_versions
 
         dependencies_last_modified = [compact_indexer.versions_path, cache.path("versions")].map{|p| File.mtime(p)}.max
         combined_data_fresh = File.exist?(combined_versions_file) && File.mtime(combined_versions_file) > dependencies_last_modified
 
-        return File.binread(combined_versions_file) if combined_data_fresh
+        if combined_data_fresh
+          say "Combined versions file not modified"
+          return File.binread(combined_versions_file)
+        end
 
         combined_versions = GemVersionsMerge.merge(local_versions, remote_versions)
 
