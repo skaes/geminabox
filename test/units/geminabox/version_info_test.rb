@@ -84,5 +84,12 @@ module Geminabox
       dest.unlink
     end
 
+    def test_handles_repeated_gem_version_entries
+      info = VersionInfo.new
+      info.content = info.version_file_preamble + "a 1.0.0,2.0.0 digest1\na 1.1.1 digest2\n"
+      assert_equal "1.0.0,2.0.0,1.1.1", info.versions["a"]
+      assert_equal "digest2", info.digests["a"]
+    end
+
   end
 end

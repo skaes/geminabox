@@ -53,14 +53,19 @@ module Geminabox
       return if line =~ /^(---|created_at:)/
 
       gem_name, gem_versions, info_digest = line.chomp.split
-      @versions[gem_name] = gem_versions
+      seen_versions = @versions[gem_name]
+      if seen_versions
+        @versions[gem_name] = "#{seen_versions},#{gem_versions}"
+      else
+        @versions[gem_name] = gem_versions
+      end
       @digests[gem_name] = info_digest
     end
 
-    def reset
-      @digests.clear
-      @versions.clear
-    end
+def reset
+@digests.clear
+@versions.clear
+end
 
   end
 end

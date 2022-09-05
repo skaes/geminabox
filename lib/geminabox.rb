@@ -48,6 +48,7 @@ module Geminabox
   autoload :Specs,                   geminabox_path('specs')
   autoload :Indexer,                 geminabox_path('indexer')
   autoload :ParallelSpecReader,      geminabox_path('parallel_spec_reader')
+  autoload :DigestDatabase,          geminabox_path('digest_database')
 
   class << self
 

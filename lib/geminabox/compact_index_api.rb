@@ -81,26 +81,39 @@ module Geminabox
       end
     end
 
-    def info(name)
+    def info(name, expected_digest = nil)
       if Geminabox.rubygems_proxy
-        local_gem_info(name) || remote_gem_info(name)
+        local_gem_info(name) || remote_gem_info(name, expected_digest)
       else
         local_gem_info(name)
       end
     end
 
     def remote_versions
-      fetch("versions") do |etag|
-        @api.fetch_versions(etag)
+      updated = false
+      old_versions = nil
+      versions = fetch("versions") do |etag|
+        @api.fetch_versions(etag).tap do |response|
+          updated = response.first == 200
+          old_versions = @cache.read("versions")
+        end
       end
+      DigestDatabase.perform do |db|
+        if db.empty?
+          db.refresh(versions, nil)
+        else
+          db.refresh(versions, old_versions) if updated
+        end
+      end
+      versions
     end
 
     def local_versions
       compact_indexer.fetch_versions
     end
 
-    def remote_gem_info(name)
-      fetch("info/#{name}") do |etag|
+    def remote_gem_info(name, expected_digest = nil)
+      fetch("info/#{name}", expected_digest) do |etag|
         @api.fetch_info(name, etag)
       end
     end
@@ -233,11 +246,8 @@ module Geminabox
     end
 
     def remote_info_for_gem(name, remote_info_digest)
-      cached_remote_info_up_to_date = cache.md5("info/#{name}") == remote_info_digest
-      remote_data = cached_remote_info_up_to_date ? cache.read("info/#{name}") : remote_gem_info(name)
-
       DependencyInfo.new(name).tap do |remote_info|
-        remote_info.content = remote_data
+        remote_info.content = remote_gem_info(name, remote_info_digest)
       end
     end
 
@@ -255,8 +265,10 @@ module Geminabox
       ["---", gem_list.to_a.sort, ""].join("\n")
     end
 
-    def fetch(path)
+    def fetch(path, expected_etag = nil)
       etag = cache.md5(path)
+      return cache.read(path) if etag && etag == expected_etag
+
       code, data = yield etag
       if code == 200
         cache.store(path, data)

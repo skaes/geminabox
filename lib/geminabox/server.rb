@@ -83,8 +83,10 @@ module Geminabox
     end
 
     get '/info/:gemname' do
+      digest = DigestDatabase.perform { |db| db.get_digest(params[:gemname]) } if Geminabox.rubygems_proxy
+
       content_type 'text/plain'
-      with_etag_for(CompactIndexApi.new.info(params[:gemname]))
+      with_etag_for(CompactIndexApi.new.info(params[:gemname], digest))
     end
 
     get '/upload' do

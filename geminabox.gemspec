@@ -25,6 +25,7 @@ Gem::Specification.new do |s|
   s.require_paths     = ['lib']
 
   s.add_dependency('sinatra', "~> 2.0")
+  s.add_dependency('sqlite3')
   s.add_dependency('builder')
   s.add_dependency('httpclient', [">= 2.2.7"])
   s.add_dependency('nesty')

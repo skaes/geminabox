@@ -108,6 +108,15 @@ module Geminabox
       @remote_api.verify
     end
 
+    def test_remote_info_when_already_cached_and_we_know_the_digest
+      Geminabox.rubygems_proxy = true
+
+      remote_info = "--\n1.0.0 |checksum:whatever\n"
+      @api.cache.store("info/r", remote_info)
+      etag = @api.cache.md5("info/r")
+      assert_equal remote_info, @api.info("r", etag)
+    end
+
     def test_local_info
       reindex
       local_info = @api.info("b")
