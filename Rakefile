@@ -1,6 +1,7 @@
 require "rubygems"
 require "rubygems/package_task"
 require "bundler/gem_tasks"
+require_relative "lib/geminabox/version"
 
 Gem::PackageTask.new(eval(File.read("geminabox.gemspec"))) do |pkg|
 end

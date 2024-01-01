@@ -1,4 +1,4 @@
-require File.expand_path('../lib/geminabox/version', __FILE__)
+require_relative 'lib/geminabox/version' unless defined?(Geminabox::VERSION)
 
 Gem::Specification.new do |s|
   s.name              = 'geminabox'
@@ -33,4 +33,7 @@ Gem::Specification.new do |s|
   s.add_dependency('reentrant_flock')
   s.add_dependency('parallel')
   s.add_dependency('ruby-progressbar')
+  s.add_dependency('mutex_m')
+  s.add_dependency('nkf')
+  s.add_dependency('bigdecimal')
 end
