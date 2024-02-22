@@ -59,13 +59,16 @@ module Geminabox
       else
         @versions[gem_name] = gem_versions
       end
-      @digests[gem_name] = info_digest
+      if info_digest.nil?
+        @digests.delete(gem_name)
+      else
+        @digests[gem_name] = info_digest
+      end
     end
 
-def reset
-@digests.clear
-@versions.clear
-end
-
+    def reset
+      @digests.clear
+      @versions.clear
+    end
   end
 end

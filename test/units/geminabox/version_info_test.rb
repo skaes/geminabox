@@ -91,5 +91,11 @@ module Geminabox
       assert_equal "digest2", info.digests["a"]
     end
 
+    def test_handles_null_digests
+      info = VersionInfo.new
+      info.content = info.version_file_preamble + "a 1.0.0 digest\na\n"
+      assert_equal Hash.new, info.digests
+    end
+
   end
 end
